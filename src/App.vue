@@ -1,10 +1,11 @@
 <template>
-  <div></div>
+  <div>
+    <router-view></router-view>
+  </div>
 </template>
 
 <script>
-// git log 查看commit记录
 export default {}
 </script>
 
-<style></style>
+<style scoped></style>
