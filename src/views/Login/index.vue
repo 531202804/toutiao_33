@@ -5,19 +5,12 @@
       <template #left> <van-icon name="cross" /> </template
     ></van-nav-bar>
     <!-- 登录表单 -->
-    <van-form @submit="onSubmit" class="form">
+    <van-form @submit="onSubmit" class="form" ref="form">
       <van-field
-        v-model="mebile"
-        name="mebile"
+        v-model="mobile"
+        name="mobile"
         placeholder="请输入手机号"
-        :rules="[
-          { required: true, message: '请填写手机号' },
-          {
-            pattern:
-              /^(?:(?:\+|00)86)?1(?:(?:3[\d])|(?:4[5-79])|(?:5[0-35-9])|(?:6[5-7])|(?:7[0-8])|(?:8[\d])|(?:9[189]))\d{8}$/,
-            message: '手机格式错误'
-          }
-        ]"
+        :rules="mebileR"
       >
         <template #label>
           <span class="toutiao toutiao-shouji"></span>
@@ -27,13 +20,29 @@
         v-model="code"
         name="code"
         placeholder="请输入验证码"
-        :rules="[
-          { required: true, message: '请填写验证码' },
-          { pattern: /[0-9]{6}/, message: '验证码错误' }
-        ]"
+        :rules="codeR"
       >
         <template #label>
           <span class="toutiao toutiao-yanzhengma"></span>
+        </template>
+        <template #button>
+          <van-button
+            class="btn"
+            round
+            block
+            type="default"
+            size="small"
+            native-type="button"
+            v-if="isTimer"
+            @click="sendCode"
+            >获取验证码</van-button
+          >
+          <van-count-down
+            :time="3 * 1000"
+            format="ss秒"
+            v-else
+            @finish="isTimer = true"
+          />
         </template>
       </van-field>
       <!-- 登录按钮 -->
@@ -45,18 +54,69 @@
 </template>
 
 <script>
+import { mebileR, codeR } from './rules'
+import { login, sendCodeAPI } from '@/api/user'
+import { mapMutations } from 'vuex'
+
 export default {
   data() {
     return {
-      mebile: '',
-      code: ''
+      mobile: '',
+      code: '',
+      mebileR,
+      codeR,
+      isTimer: true
     }
   },
   methods: {
-    onSubmit(values) {
-      console.log('submit', values)
+    ...mapMutations(['SET_TOKEN']),
+    async onSubmit(values) {
+      // 只有在表单校验通过才会触发提交事件
+      this.loading()
+      try {
+        const { data } = await login(this.mobile, this.code)
+        // 将token存进vuex
+        this.SET_TOKEN(data.data)
+        this.$router.push('/profile')
+        this.$toast.success('登录成功')
+      } catch (error) {
+        if (error.response && error.response.status === 400) {
+          this.$toast.fail(error.response.data.message)
+        } else {
+          this.$toast.clear()
+          throw error
+        }
+      }
     },
-    onClickLeft() {}
+    loading() {
+      this.$toast.loading({
+        message: '登录中',
+        forbidClick: true,
+        duration: 0,
+        overlay: true
+      })
+    },
+    onClickLeft() {},
+
+    async sendCode() {
+      await this.$refs.form.validate('mobile')
+      this.loading()
+      try {
+        await sendCodeAPI(this.mobile)
+        this.$toast.success('发送验证码成功')
+        this.isTimer = false
+      } catch (error) {
+        if (
+          (error.response && error.response.status === 429) ||
+          error.response.status === 404
+        ) {
+          this.$toast.fail(error.response.data.message)
+        } else {
+          this.$toast.clear()
+          throw error
+        }
+      }
+    }
   }
 }
 </script>
@@ -78,5 +138,10 @@ export default {
   .toutiao {
     font-size: 45px;
   }
+}
+.btn {
+  background-color: #eee;
+  color: #9e8792;
+  height: 0.64rem;
 }
 </style>
