@@ -36,7 +36,9 @@ export default new Vuex.Store({
       }
     })
   ],
-  state: {},
+  state: {
+    tokenObj: {}
+  },
   getters: {
     isLogin(state) {
       return !!state.tokenObj.token

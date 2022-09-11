@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- 头部导航 -->
-    <van-nav-bar title="登录" left-arrow @click-left="onClickLeft">
+    <van-nav-bar title="登录" left-arrow>
       <template #left> <van-icon name="cross" /> </template
     ></van-nav-bar>
     <!-- 登录表单 -->
