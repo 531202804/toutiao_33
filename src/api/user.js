@@ -1,5 +1,6 @@
 // 用户 接口请求文档
 import request from '@/utils/request'
+
 /**
  * 登录
  * @param {String} mobile 手机号
@@ -17,8 +18,24 @@ export const login = (mobile, code) => {
     }
   })
 }
+
+/**
+ * 发送验证码
+ * @param {String} mobile
+ * @returns Promise
+ */
 export const sendCodeAPI = (mobile) => {
   return request({
     url: `/v1_0/sms/codes/${mobile}`
+  })
+}
+
+/**
+ * 获取用户信息
+ * @returns Promise
+ */
+export const getUserInfoAPI = () => {
+  return request({
+    url: '/v1_0/user/'
   })
 }

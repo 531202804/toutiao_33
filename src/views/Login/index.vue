@@ -77,7 +77,7 @@ export default {
         const { data } = await login(this.mobile, this.code)
         // 将token存进vuex
         this.SET_TOKEN(data.data)
-        this.$router.push('/profile')
+        this.$router.push('/my')
         this.$toast.success('登录成功')
       } catch (error) {
         if (error.response && error.response.status === 400) {

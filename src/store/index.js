@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import createPersistedState from 'vuex-persistedstate'
 
 Vue.use(Vuex)
 // vuex声明变量
@@ -19,11 +20,28 @@ Vue.use(Vuex)
 
 // getters  --> 相当于computed计算属性
 // getters的函数 第一个参数是state
+
+// 1.下载
+//  yarn add vuex-persistedstate@3.2.1
+// 2.引入
+//  import createPersistedState from 'vuex-persistedstate'
+// 3.调用
+// plugins: [createPersistedState()]
 export default new Vuex.Store({
-  state: {
-    tokenObj: {}
+  plugins: [
+    createPersistedState({
+      key: 'HEIMA_TOUTIAO',
+      reducer({ tokenObj }) {
+        return { tokenObj }
+      }
+    })
+  ],
+  state: {},
+  getters: {
+    isLogin(state) {
+      return !!state.tokenObj.token
+    }
   },
-  getters: {},
   mutations: {
     SET_TOKEN(state, token) {
       state.tokenObj = token

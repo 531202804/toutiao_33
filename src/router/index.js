@@ -6,13 +6,31 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/',
-    redirect: '/login'
+    component: () => import('@/views/Layout'),
+    redriect: '/ ',
+    children: [
+      {
+        path: '/ ',
+        component: () => import('@/views/Home')
+      },
+      {
+        path: '/video',
+        component: () => import('@/views/Video')
+      },
+      {
+        path: '/qa',
+        component: () => import('@/views/QA')
+      },
+      {
+        path: '/my',
+        component: () => import('@/views/My')
+      }
+    ]
   },
   {
     path: '/login',
     // 路由懒加载
-    component: () => import('@/views/Login'),
-    meta: '登录'
+    component: () => import('@/views/Login')
   }
 ]
 
