@@ -13,20 +13,35 @@
         <Article :id="item.id"></Article>
       </van-tab>
 
-      <span class="toutiao toutiao-gengduo"></span>
+      <span class="toutiao toutiao-gengduo" @click="isShow = true"></span>
     </van-tabs>
+    <!--  -->
+    <van-popup
+      v-model="isShow"
+      position="bottom"
+      :style="{ height: '100%' }"
+      closeable
+      close-icon-position="top-left"
+    >
+      <Channel
+        :myChannels="channels"
+        @change-active=";[(isShow = false), (active = $event)]"
+      ></Channel>
+    </van-popup>
   </div>
 </template>
 
 <script>
 import { getChannelAPI } from '@/api'
 import Article from '@/views/Home/components/Article'
+import Channel from '@/views/Home/components/Channel'
 export default {
-  components: { Article },
+  components: { Article, Channel },
   data() {
     return {
       active: 0,
-      channels: []
+      channels: [],
+      isShow: false
     }
   },
   created() {
