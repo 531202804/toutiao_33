@@ -24,17 +24,22 @@
       close-icon-position="top-left"
     >
       <Channel
+        v-if="isShow"
         :myChannels="channels"
         @change-active=";[(isShow = false), (active = $event)]"
+        @delChannel="delFn"
+        @addChannel="addFn"
       ></Channel>
     </van-popup>
   </div>
 </template>
 
 <script>
-import { getChannelAPI } from '@/api'
+import { getChannelAPI, delChannelAPI, addChannelAPI } from '@/api'
 import Article from '@/views/Home/components/Article'
 import Channel from '@/views/Home/components/Channel'
+import { mapGetters, mapMutations } from 'vuex'
+
 export default {
   components: { Article, Channel },
   data() {
@@ -45,13 +50,32 @@ export default {
     }
   },
   created() {
-    this.getChannel()
+    this.initChannel()
+  },
+  computed: {
+    ...mapGetters(['isLogin'])
   },
   methods: {
+    ...mapMutations(['SET_CHANNEL']),
+
+    // 初始化
+    initChannel() {
+      if (this.isLogin) {
+        // 已登录
+        this.getChannel()
+      } else {
+        // 未登录
+        const myChannels = this.$store.state.myChannels
+        if (myChannels.length === 0) {
+          this.getChannel()
+        } else {
+          this.channels = myChannels
+        }
+      }
+    },
     async getChannel() {
       try {
         const { data } = await getChannelAPI()
-        console.log(data)
         this.channels = data.data.channels
       } catch (error) {
         // js错误 程序员处理， axios状态码是507 提示用户刷新
@@ -59,6 +83,50 @@ export default {
           throw error
         } else {
           error.response.status === 507 ?? this.$toast.fail('请刷新')
+        }
+      }
+    },
+    // 删除我的频道功能
+    async delFn(id) {
+      // 发送请求删除频道
+      const newChannels = this.channels.filter((item) => item.id !== id)
+      try {
+        if (this.isLogin) {
+          // 发送请求删除频道
+          await delChannelAPI(id)
+        } else {
+          // 如果未登录存入本地存储
+          this.SET_CHANNEL(newChannels)
+        }
+        // 已删除的channels
+        this.channels = newChannels
+        this.$toast.success('删除频道成功')
+      } catch (error) {
+        if (error.response && error.response.status === 401) {
+          this.$toast.fail('未登录，请先登录再删除')
+        } else {
+          throw error
+        }
+      }
+    },
+    // 添加到我的频道
+    async addFn(item) {
+      try {
+        if (this.isLogin) {
+          // 发送请求添加频道
+          await addChannelAPI(item.id, this.channels.length)
+        } else {
+          // 如果未登录存入本地存储
+          this.SET_CHANNEL([...this.channels, item])
+        }
+
+        this.channels.push(item)
+        this.$toast.success('添加频道成功')
+      } catch (error) {
+        if (error.response && error.response.status === 401) {
+          this.$toast.fail('未登录，请先登录再添加')
+        } else {
+          throw error
         }
       }
     }

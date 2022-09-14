@@ -58,7 +58,6 @@ export default {
       try {
         const { data } = await getArticleAPI(this.id, +new Date())
         this.articles = data.data.results
-        console.log(data.data.results)
         this.pretime = data.data.pre_timestamp
       } catch (error) {
         // js的错误，上抛：400 上抛中文，507原封不动

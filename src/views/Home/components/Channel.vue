@@ -35,7 +35,7 @@
           :key="item.id"
           :text="item.name"
           icon="plus"
-          @click="addChannel"
+          @click="$emit('addChannel', item)"
         >
         </van-grid-item>
       </van-grid>
@@ -62,15 +62,11 @@ export default {
     async getAllChannel() {
       const { data } = await getAllChannelAPI()
       this.allChannels = data.data.channels
-      console.log(this.allChannels)
     },
-    addChannel() {
-      console.log(1)
-      this.allChannels.push()
-    },
+
     handleChannel(item, index) {
-      if (this.isClick && item !== '推荐') {
-        console.log(1)
+      if (this.isClick && item.name !== '推荐') {
+        this.$emit('delChannel', item.id)
       } else {
         // 关闭弹窗
         // 切换频道
